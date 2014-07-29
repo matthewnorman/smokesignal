@@ -1,0 +1,9 @@
+argparse==1.2.1
+cffi==0.8.6
+cryptography==0.5.2
+py==1.4.22
+pycparser==2.10
+pycrypto==2.6.1
+pytest==2.6.0
+six==1.7.3
+wsgiref==0.1.2
