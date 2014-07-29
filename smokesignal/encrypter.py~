@@ -1,0 +1,9 @@
+import cryptography
+
+
+class Crypter(object):
+    """
+    A library that can, when given a key, encrypt and decrypt content.
+    Basically a wrapper around cryptography
+
+    """
