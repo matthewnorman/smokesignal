@@ -1,0 +1,12 @@
+import pytest
+import cryptography
+
+
+def test_basic_encryption():
+    """
+    Generate a simple RSA key and make sure that you
+    can encrypt and decrypt context
+
+    """
+
+    context = 'This is a short string'
