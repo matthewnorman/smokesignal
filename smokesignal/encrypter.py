@@ -1,6 +1,9 @@
 from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives import interfaces
 from cryptography.hazmat.primitives import asymmetric
+from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives.asymmetric import padding
+from cryptography.hazmat.primitives.serialization import load_pem_pkcs8_private_key
 
 class Crypter(object):
     """
@@ -36,3 +39,19 @@ class Crypter(object):
         result = private_key.decrypt(ciphertext, self.padding)
         return result
                                      
+    def load_private_key(self, filename, password=None):
+        """
+        Given a file, load a private key
+
+        """
+
+        with open(filename, 'r') as f:
+            data = f.read()
+        key = load_pem_pkcs8_private_key(data=data, password=password,
+                                         backend=default_backend())
+
+        if not isinstance(key, interfaces.RSAPrivateKey):
+            raise TypeError
+
+        return key
+        
