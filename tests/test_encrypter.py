@@ -20,4 +20,6 @@ def test_basic_encryption():
                                            backend=default_backend())
 
     public_key = private_key.public_key()
-    print crypter.encrypt(key=public_key, content=content)
+    ciphertext = crypter.encrypt(public_key=public_key, content=content)
+    result = crypter.decrypt(private_key=private_key, ciphertext=ciphertext)
+    assert content == result
