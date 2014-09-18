@@ -1,3 +1,5 @@
+import os
+
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives import interfaces
 from cryptography.hazmat.primitives import asymmetric
@@ -5,6 +7,7 @@ from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives.asymmetric import padding
 from cryptography.hazmat.primitives.serialization import load_pem_pkcs8_private_key
 from cryptography.fernet import Fernet
+from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 
 class Crypter(object):
     """
@@ -13,13 +16,45 @@ class Crypter(object):
 
     """
 
-    def __init__(self, key_size=1024):
+    def __init__(self, key_size=32):
         super(Crypter, self).__init__()
         self.padding = asymmetric.padding.OAEP(
             mgf=asymmetric.padding.MGF1(algorithm=hashes.SHA1()),
             algorithm=hashes.SHA1(),
             label=None)
-        self.key_size=1024
+        self.key_size=key_size
+
+    def encrypt(self, public_key, content):
+        """
+        My own entry point for actual use. Use a symmetric key of my own
+        specification to do symmetric encryption.
+
+        """
+        key = os.urandom(self.key_size)
+        algorithm = algorithms.AES(key=key)
+        iv = os.urandom(algorithm.block_size/8)
+        cipher = Cipher(algorithms.AES(key=key), mode=modes.CFB8(iv),
+                        backend=default_backend())
+        encryptor = cipher.encryptor()
+        ciphertext = encryptor.update(bytes(content)) + encryptor.finalize()
+        encrypted_key = self.encrypt_rsa(public_key=public_key,
+                                         content=key)
+
+        return encrypted_key, iv, ciphertext
+
+    def decrypt(self, private_key, encrypted_key, iv, ciphertext):
+        """
+        Given all three necessary inputs, decrypt the symmetric key,
+        create the decryptor, and decrypt the content
+
+        """
+        key = self.decrypt_rsa(private_key=private_key,
+                               ciphertext=encrypted_key)
+        cipher = Cipher(algorithms.AES(key=key), mode=modes.CFB8(iv),
+                        backend=default_backend())
+        decryptor = cipher.decryptor()
+        content = decryptor.update(ciphertext) + decryptor.finalize()
+        return content
 
     def encrypt_fernet(self, public_key, content):
         """

@@ -47,3 +47,25 @@ def test_fernet_encryption():
     result = crypter.decrypt_fernet(private_key=private_key,
                                     encrypted_key=key, ciphertext=text)
     assert result == content
+
+
+def test_encryptor():
+    """
+    Test my dual-mode implementation.
+
+    """
+
+    content = 'This is a short string'
+    crypter = encrypter.Crypter()
+
+    private_key = rsa.generate_private_key(public_exponent=65537,
+                                           key_size=2048,
+                                           backend=default_backend())
+
+    public_key = private_key.public_key()
+
+    key, iv, text = crypter.encrypt(public_key=public_key,
+                                    content=content)
+    result = crypter.decrypt(private_key=private_key, encrypted_key=key,
+                             iv=iv, ciphertext=text)
+    assert result == content
